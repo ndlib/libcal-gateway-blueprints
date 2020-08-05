@@ -157,6 +157,7 @@ export class LibCalGatewayBuildRole extends Role {
         resources: [
           Fn.sub('arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/all/libcal-gateway/*'),
           Fn.sub('arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/all/sentry/*'),
+          Fn.sub('arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/all/github/*'),
         ],
         actions: ['ssm:GetParametersByPath', 'ssm:GetParameter', 'ssm:GetParameters'],
       }),
