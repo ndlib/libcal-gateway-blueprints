@@ -1,0 +1,20 @@
+{
+  "app": "npx ts-node bin/cdk.ts",
+  "context": {
+    "@aws-cdk/core:enableStackNameDuplicates": "true",
+    "aws-cdk:enableDiffNoFail": "true",
+    "projectName": "libcal-gateway-blueprints",
+    "description": "Infrastructure for libcal-gateway service",
+    "gitTokenPath": "/all/github/ndlib-git",
+    "gitOwner": "ndlib",
+    "serviceRepository": "libcal-gateway",
+    "serviceBranch": "master",
+    "blueprintsRepository": "libcal-gateway-blueprints",
+    "blueprintsBranch": "master",
+    "sentryTokenPath": "/all/sentry/ci-token",
+    "sentryOrg": "university-of-notre-dame-ts",
+    "sentryProject": "libcal-gateway",
+    "emailReceivers": "wse-notifications-group@nd.edu",
+    "secretsPath": "/all/libcal-gateway"
+  }
+}
