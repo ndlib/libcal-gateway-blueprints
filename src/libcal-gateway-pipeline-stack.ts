@@ -10,7 +10,7 @@ import { Role, ServicePrincipal } from '@aws-cdk/aws-iam'
 import sns = require('@aws-cdk/aws-sns')
 import cdk = require('@aws-cdk/core')
 import { SecretValue } from '@aws-cdk/core'
-import { ArtifactBucket, PipelineNotifications } from '@ndlib/ndlib-cdk'
+import { ArtifactBucket, PipelineNotifications, SlackApproval } from '@ndlib/ndlib-cdk'
 import LibCalGatewayBuildProject from './libcal-gateway-build-project'
 import LibCalGatewayBuildRole from './libcal-gateway-build-role'
 
@@ -24,6 +24,7 @@ export interface ILibCalGatewayPipelineStackProps extends cdk.StackProps {
   readonly blueprintsRepository: string
   readonly blueprintsBranch: string
   readonly emailReceivers: string
+  readonly slackNotifyStackName?: string
   // Following props needed for build project
   readonly contact: string
   readonly owner: string
@@ -117,6 +118,12 @@ export default class LibCalGatewayPipelineStack extends cdk.Stack {
       additionalInformation: 'Approve or Reject this change after testing',
       runOrder: 99, // Approval should always be last
     })
+    if (props.slackNotifyStackName) {
+      new SlackApproval(this, 'SlackApproval', {
+        approvalTopic,
+        notifyStackName: props.slackNotifyStackName,
+      })
+    }
 
     // TEST STAGE
     pipeline.addStage({
