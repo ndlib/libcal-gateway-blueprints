@@ -129,5 +129,12 @@ export default class LibCalGatewayStack extends cdk.Stack {
       new apigateway.LambdaIntegration(cancelBookingLambda, cancelIntegrationOptions),
       cancelMethodOptions,
     )
+
+    // Output API url to ssm so we can import it in the QA project
+    new StringParameter(this, 'ApiUrlParameter', {
+      parameterName: `${paramStorePath}/api-url`,
+      description: 'Path to root of the API gateway.',
+      stringValue: api.url,
+    })
   }
 }
