@@ -64,6 +64,21 @@ export default class LibCalGatewayStack extends cdk.Stack {
       environment: env,
     })
 
+    const hoursLambda = new lambda.Function(this, 'hoursFunction', {
+      functionName: `${props.stackName}-hours`,
+      description: 'Get hours for library locations from Libcal.',
+      code: lambda.Code.fromAsset(props.lambdaCodePath),
+      handler: 'hours.handler',
+      runtime: lambda.Runtime.NODEJS_12_X,
+      logRetention: RetentionDays.ONE_WEEK,
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(30),
+      environment: {
+        ...env,
+        LIBCAL_HOURS_WIDGET_URL: StringParameter.valueForStringParameter(this, `${paramStorePath}/hours_widget_url`),
+      },
+    })
+
     // API GATEWAY
     const api = new apigateway.RestApi(this, 'ApiGateway', {
       restApiName: props.stackName,
@@ -104,6 +119,7 @@ export default class LibCalGatewayStack extends cdk.Stack {
     const endpointData = [
       { path: '/space/locations', method: 'GET', lambda: spaceLocationsLambda, requiresAuth: false },
       { path: '/space/bookings', method: 'GET', lambda: spaceBookingsLambda, requiresAuth: true },
+      { path: '/hours', method: 'GET', lambda: hoursLambda, requiresAuth: false },
     ]
     endpointData.forEach(endpoint => {
       const newResource = api.root.resourceForPath(endpoint.path)
