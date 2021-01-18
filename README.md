@@ -11,5 +11,5 @@ Infrastructure-as-code for the Hesburgh Libraries [libcal-gateway service](https
 
 ## Deployment
 ```
-cdk deploy libcal-gateway-pipeline
+cdk deploy libcal-gateway-pipeline -c slackNotifyStackName=[stack-name]
 ```
