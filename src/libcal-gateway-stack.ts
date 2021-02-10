@@ -18,6 +18,7 @@ export default class LibCalGatewayStack extends cdk.Stack {
     super(scope, id, props)
 
     // LAMBDAS
+    const cfSecretsPath = `/all/contentful/${props.stage}`
     const paramStorePath = `/all/libcal-gateway/${props.stage}`
     const env = {
       SENTRY_DSN: StringParameter.valueForStringParameter(this, `${paramStorePath}/sentry_dsn`),
@@ -79,6 +80,30 @@ export default class LibCalGatewayStack extends cdk.Stack {
       },
     })
 
+    const newEventLambda = new lambda.Function(this, 'newEventFunction', {
+      functionName: `${props.stackName}-newEvent`,
+      description: 'Contentful hook to update event information from LibCal.',
+      code: lambda.Code.fromAsset(props.lambdaCodePath),
+      handler: 'newEvent.handler',
+      runtime: lambda.Runtime.NODEJS_12_X,
+      logRetention: RetentionDays.ONE_WEEK,
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(30),
+      environment: {
+        ...env,
+        CONTENTFUL_SPACE: cdk.SecretValue.secretsManager(cfSecretsPath, {
+          jsonField: 'library-website/space',
+        }).toString(),
+        CONTENTFUL_ENV: cdk.SecretValue.secretsManager(cfSecretsPath, {
+          jsonField: 'library-website/environment',
+        }).toString(),
+        CONTENTFUL_CMA_TOKEN: cdk.SecretValue.secretsManager(cfSecretsPath, {
+          jsonField: 'management_token',
+        }).toString(),
+        CONTENTFUL_CMA_URL: 'https://api.contentful.com',
+      },
+    })
+
     // API GATEWAY
     const api = new apigateway.RestApi(this, 'ApiGateway', {
       restApiName: props.stackName,
@@ -120,6 +145,7 @@ export default class LibCalGatewayStack extends cdk.Stack {
       { path: '/space/locations', method: 'GET', lambda: spaceLocationsLambda, requiresAuth: false },
       { path: '/space/bookings', method: 'GET', lambda: spaceBookingsLambda, requiresAuth: true },
       { path: '/hours', method: 'GET', lambda: hoursLambda, requiresAuth: false },
+      { path: '/newevent', method: 'POST', lambda: newEventLambda, requiresAuth: false },
     ]
     endpointData.forEach(endpoint => {
       const newResource = api.root.resourceForPath(endpoint.path)
